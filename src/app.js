@@ -1,14 +1,13 @@
 const express = require("express");
 
+const dbConnect=require("./config/database");
 const app = express();
 
-app.use("/hello",(req,res)=>{
-    res.send("Hello from server");
-})
-app.use("/test",(req,res)=>{
-    res.send("test from server");
-})
-
-app.listen(3000, () => {
-    console.log("Server is listening on port 3000...");
+dbConnect().then(()=>{
+    console.log("database connected successfully");
+    app.listen(3000, () => {
+        console.log("Server is listening on port 3000...");
+    });
+}).catch(()=>{
+    console.error("DB Connection cannot be established");
 });
