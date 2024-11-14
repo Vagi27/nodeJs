@@ -1,34 +1,24 @@
 const express = require("express");
-const User=require("./models/User");
+const cookieParser=require("cookie-parser");
 
-const dbConnect=require("./config/database");
+const dbConnect = require("./config/database");
+const User = require("./models/User");
+const { authRouter } = require("./routes/auth");
+const { userRouter } = require("./routes/user");
 const app = express();
-app.use("/",express.json());
 
-app.post("/signup",async (req,res)=>{
-    console.log(req.body);
-    
-    try{
-        const user=new User(req.body);
-        await user.save();
-        res.send(("User Added Successfully"));
-        
-    }
-    catch(err){
-        console.error("something went wrong",err.message);
-        res.send(("something went wrong"));
-    }
+app.use("/", express.json());
+app.use("/", cookieParser());
+app.use(authRouter);
+app.use(userRouter);
 
-    
-
-
-});
-
-dbConnect().then(()=>{
-    console.log("database connected successfully");
-    app.listen(3000, () => {
-        console.log("Server is listening on port 3000...");
+dbConnect()
+    .then(() => {
+        console.log("database connected successfully");
+        app.listen(3000, () => {
+            console.log("Server is listening on port 3000...");
+        });
+    })
+    .catch(() => {
+        console.error("DB Connection cannot be established");
     });
-}).catch(()=>{
-    console.error("DB Connection cannot be established");
-});
