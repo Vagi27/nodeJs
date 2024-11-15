@@ -52,11 +52,15 @@ authRouter.post("/login", async (req, res) => {
         };
         const token = jwt.sign(payload, JWT_Secret_Key);
         // console.log(token);
-        res.cookie("token",token);
+        res.cookie("token", token);
         res.send("login successful");
     } catch (err) {
         res.status(400).send("cannot log in: " + err.message);
     }
+});
+authRouter.post("/logout", async (req,res) => {
+    res.cookie("token", null, { expires: new Date(Date.now()) });
+    res.send("logout successful, Cookie Cleared");
 });
 
 module.exports = { authRouter };
