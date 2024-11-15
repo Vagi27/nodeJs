@@ -11,7 +11,7 @@ const userAuth = (req, res, next) => {
         req.user = user;
         next();
     } catch (err) {
-        res.send("invalid token: " + err.message);
+        res.send("Error: token is not valid!!");
     }
 };
 
