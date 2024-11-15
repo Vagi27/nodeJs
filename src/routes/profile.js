@@ -13,7 +13,7 @@ profileRouter.get("/allusers", userAuth, async (req, res) => {
         res.send("error Occurred:" + err.message);
     }
 });
-profileRouter.get("/profile", userAuth, async (req, res) => {
+profileRouter.get("/profile/view", userAuth, async (req, res) => {
     try {
         const user = await User.findOne({ _id: req.user.id }).select(safeData);
         res.json({ data: user });
@@ -21,5 +21,13 @@ profileRouter.get("/profile", userAuth, async (req, res) => {
         res.status(400).send("cannot get profile " + err.message);
     }
 });
+profileRouter.patch("/profile/edit",userAuth,async(req,res)=>{
+    try {
+        
+    } catch (err) {
+        res.status(400).send("Cannot update profile: " + err.message);
+        
+    }
+})
 
 module.exports = { profileRouter };
