@@ -1,14 +1,17 @@
 const jwt = require("jsonwebtoken");
 const JWT_Secret_Key = "DevTinder@$123";
+const User=require("../models/User");
 
-const userAuth = (req, res, next) => {
+const userAuth = async (req, res, next) => {
     try {
         const { token } = req.cookies;
         const user = jwt.verify(token, JWT_Secret_Key);
         if (!user) {
             console.log("invalid token");
         }
-        req.user = user;
+        const safeData = "firstName lastName email about age gender skills photoURL";
+        req.user = await User.findOne({_id:user.id}).select(safeData);
+        // console.log(req.user);
         next();
     } catch (err) {
         res.send("Error: token is not valid!!");
