@@ -21,5 +21,26 @@ userRouter.get("/user/requests", userAuth, async (req, res) => {
         res.send("Couldn't get request: " + err.message);
     }
 });
+userRouter.get("/user/connections", userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+
+        const connections = await connectionRequest.find({
+            $or: [
+                { fromUserId: loggedInUser.id, status: "accepted" },
+                { toUserId: loggedInUser.id, status: "accepted" },
+            ],
+        }).populate("fromUserId","firstName lastName");
+        if (!connections) {
+            throw new Error("No connections found");
+        }
+        res.json({
+            message: `Connections of ${loggedInUser.firstName}`,
+            data: connections,
+        });
+    } catch (err) {
+        res.send("Couldn't get connections: " + err.message);
+    }
+});
 
 module.exports = { userRouter };
