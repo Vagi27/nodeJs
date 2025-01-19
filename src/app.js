@@ -6,8 +6,15 @@ const { authRouter } = require("./routes/auth");
 const { profileRouter } = require("./routes/profile");
 const { requestRouter } = require("./routes/request");
 const { userRouter } = require("./routes/user");
+var cors = require("cors");
 const app = express();
 
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    })
+);
 app.use("/", express.json());
 app.use("/", cookieParser());
 app.use(authRouter); //equivalent to-> app.use("/",authRouter)
@@ -19,7 +26,7 @@ dbConnect()
     .then(() => {
         console.log("database connected successfully");
         app.listen(3000, () => {
-            console.log("Server is listening on port 3000...");
+            console.log("Server is listening on port http://localhost:3000");
         });
     })
     .catch(() => {
