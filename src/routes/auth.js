@@ -24,7 +24,18 @@ authRouter.post("/signup", async (req, res) => {
 
         user.password = hashedPassword;
         user.save();
-        res.json({ message: "User Added Successfully", data: user });
+
+        const payload = {
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+        };
+        const token = jwt.sign(payload, JWT_Secret_Key);
+        res.cookie("token", token);
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+
+        res.json({ message: "User Added Successfully", data: userWithoutPassword });
     } catch (err) {
         res.status(400).send("Error saving user: " + err.message);
     }
@@ -36,14 +47,14 @@ authRouter.post("/login", async (req, res) => {
 
         validateLoginData(req);
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).exec();
         if (!user) {
             throw new Error("user does not exist!");
         }
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            throw new Error("invalid credentials!");
+            throw new Error("Invalid Credentials!");
         }
         const payload = {
             id: user._id,
@@ -53,12 +64,16 @@ authRouter.post("/login", async (req, res) => {
         const token = jwt.sign(payload, JWT_Secret_Key);
         // console.log(token);
         res.cookie("token", token);
-        res.send("login successful");
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+        // console.log(user);
+
+        res.json(userWithoutPassword);
     } catch (err) {
-        res.status(400).send("cannot log in: " + err.message);
+        res.status(400).send(err.message);
     }
 });
-authRouter.post("/logout", async (req,res) => {
+authRouter.get("/logout", async (req, res) => {
     res.cookie("token", null, { expires: new Date(Date.now()) });
     res.send("logout successful, Cookie Cleared");
 });
