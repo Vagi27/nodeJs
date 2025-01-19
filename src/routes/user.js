@@ -13,7 +13,7 @@ userRouter.get("/user/requests", userAuth, async (req, res) => {
                 toUserId: loggedInUser.id,
                 status: "interested",
             })
-            .populate("fromUserId", "firstName lastName");
+            .populate("fromUserId", safeData);
 
         res.json({
             message: `all requests to ${loggedInUser.firstName}`,
@@ -34,8 +34,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
                     { toUserId: loggedInUser.id, status: "accepted" },
                 ],
             })
-            .populate("fromUserId", "firstName")
-            .populate("toUserId", "firstName");
+            .populate("fromUserId", safeData)
+            .populate("toUserId", safeData);
 
         const data = connections.map((row) => {
             if (row.fromUserId._id.toString() === loggedInUser.id.toString()) {
@@ -89,7 +89,15 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
             .select(safeData)
             .skip(skip)
             .limit(limit);
-        res.json({ message: "Feed!", data: usersOnFeed });
+
+        const totalUsers = await User.countDocuments({
+            $and: [
+                { _id: { $nin: Array.from(hideUsersFromFeed) } },
+                { _id: { $ne: loggedInUser.id } },
+            ],
+        });
+        const hasMore = skip + limit < totalUsers;
+        res.json({ message: "Feed!", data: usersOnFeed,hasMore });
     } catch (err) {
         res.status(400).send("Cannot get feed: " + err.message);
     }
